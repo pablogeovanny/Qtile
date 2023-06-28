@@ -445,7 +445,7 @@ mouse_callbacks={
 #        foreground=colours[2],
 #        linewidth=1,
 #        padding=10),
-    widget.PulseVolume(
+    widget.Volume(
         foreground=colours[6],
         fmt=" {}",
         update_interval=0.1,
