@@ -23,7 +23,7 @@ from libqtile.widget import Spacer
 #autostart
 cmd = [
 	"setxkbmap es",
-	"feh --bg-fill /home/kali/Pictures/wall.jpg",
+	"feh --bg-fill ~/.config/qtile/wall.jpg",
 	"picom --no-vsync &"
 ]
 for x in cmd:
