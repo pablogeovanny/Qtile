@@ -323,21 +323,21 @@ layout_theme = {
 }
 
 layouts = [
-    # layout.Bsp(**layout_theme),
-    # layout.Columns(**layout_theme),
-    # layout.Matrix(**layout_theme),
-    # layout.MonadWide(**layout_theme),
-    # layout.RatioTile(**layout_theme),
-   # layout.Slice(**layout_theme),
-    # layout.Stack(num_stacks=2),
-    # layout.Stack(stacks=2, **layout_theme),
-    # layout.Tile(shift_windows=True, **layout_theme),
-    # layout.VerticalTile(**layout_theme),
-    # layout.Zoomy(**layout_theme),
-	layout.Floating(**layout_theme),
-	layout.Max(**layout_theme),
-#	layout.MonadTall(**border_args),
     	layout.MonadTall(**layout_theme),
+	layout.MonadWide(**layout_theme),
+	layout.Max(**layout_theme),
+	layout.Floating(**layout_theme),
+#	layout.Bsp(**layout_theme),
+#	layout.Columns(**layout_theme),
+#	layout.Matrix(**layout_theme),
+#	layout.RatioTile(**layout_theme),
+#	layout.Slice(**layout_theme),
+#	layout.Stack(num_stacks=2),
+#	layout.Stack(stacks=2, **layout_theme),
+#	layout.Tile(shift_windows=True, **layout_theme),
+#	layout.VerticalTile(**layout_theme),
+#	layout.Zoomy(**layout_theme),
+#	layout.MonadTall(**border_args),
 ]
 
 prompt = f"{os.environ['USER']}@{socket.gethostname()}: "
@@ -451,7 +451,7 @@ mouse_callbacks={
         update_interval=0.1,
         volume_app="pavucontrol",
         step=5,
-	limit_max_volume='true'
+	limit_max_volume="true"
 ),
     widget.Sep(
         foreground=colours[2],
