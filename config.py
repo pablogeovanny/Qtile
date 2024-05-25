@@ -18,7 +18,8 @@ from libqtile.config import EzKey as Key
 from libqtile.config import Group, Rule, Match, Screen
 from libqtile.lazy import lazy
 from libqtile.utils import guess_terminal
-from libqtile.widget import Spacer
+from libqtile.widget import Spacer, Prompt
+from libqtile.widget.prompt import Prompt
 
 #autostart
 cmd = [
@@ -30,15 +31,25 @@ for x in cmd:
 	os.system(x)
 
 mod = "mod4"
-my_term = "qterminal"
+my_term = "alacritty"
 my_browser = "firefox"
 my_file_manager = "thunar"
-my_markdown = "marktext"
-my_music_player = my_term + " --class cmus,cmus -e cmus"
-my_office_suite = "desktopeditors"
-my_pdf_reader = "zathura"
-my_text_editor = "geany"
-my_video_player = "celluloid"
+target = ""
+#my_markdown = "marktext"
+#my_music_player = my_term + " --class cmus,cmus -e cmus"
+#my_office_suite = "desktopeditors"
+#my_pdf_reader = "zathura"
+#my_text_editor = "geany"
+#my_video_player = "celluloid"
+@lazy.function
+def update_target(qtile):
+	def get_text(text):
+		genpolltext = qtile.widgets_map["targettext"]
+		genpolltext.update(f" {text}")
+		global target
+		target = text
+	prompt = qtile.widgets_map["prompt"]
+	prompt.start_input("", get_text)
 
 mouse = [
     Drag("M-1",
@@ -51,16 +62,19 @@ mouse = [
           lazy.window.bring_to_front()),
 ]
 
-keys = [
 # SUPER + FUNCTION KEYS
+keys = [
 	Key("M-f", lazy.spawn('firefox')),
 	Key("M-q", lazy.window.kill()),
-	Key("M-t", lazy.spawn('qterminal')),
+	Key("M-t", lazy.spawn(my_term)),
 	Key("M-v", lazy.spawn('pavucontrol')),
 	Key("M-m", lazy.spawn('thunar')),
+#	Key("M-y", lazy.spawncmd()),
+	Key("M-y", update_target),
+#	Key("M-i", lazy.spawn('echo $(whoami | xsel -ib')),
 	Key("M-<return>", lazy.spawn('rofi -show run')),
 
-# SUPER + SHIFT KEYS
+# SUPER + CTRL + ALT + FUNCTION KEYS
 	Key("M-C-A-r", lazy.restart()),
 	Key("M-C-A-p", lazy.spawn('poweroff')),
 	Key("M-C-A-c", lazy.shutdown(), desc="Quit Qtile"),
@@ -148,9 +162,6 @@ keys = [
 
 # TOGGLE FLOATING LAYOUT
     Key("M-S-<space>", lazy.window.toggle_floating()),
-
-
-
 #    Key("M-S-j", lazy.layout.shuffle_up(), desc="Swap with previous window"),
 #    Key("M-S-k", lazy.layout.shuffle_down(), desc="Swap with next window"),
 #    Key("M-j", lazy.group.prev_window(),
@@ -313,6 +324,7 @@ colours = [
     ["#4fa6ed", "#4fa6ed"],
     ["#bf68d9", "#bf68d9"],
     ["#48b0bd", "#48b0bd"],
+    ["#e85679", "#e85679"],
 ]
 
 layout_theme = {
@@ -340,7 +352,7 @@ layouts = [
 #	layout.MonadTall(**border_args),
 ]
 
-prompt = f"{os.environ['USER']}@{socket.gethostname()}: "
+#prompt = f"{os.environ['USER']}@{socket.gethostname()}: "
 
 widget_defaults = dict(background=colours[0],
                        foreground=colours[1],
@@ -351,18 +363,19 @@ widget_defaults = dict(background=colours[0],
 extension_defaults = widget_defaults.copy()
 
 widgets = [
-    widget.Sep(
-        foreground=colours[0],
-        linewidth=4),
+    widget.Sep(foreground=colours[0], linewidth=4),
     widget.Image(
+	margin=2,
+	fontsize = 14,
         filename="~/.config/qtile/logohitman.png",
         mouse_callbacks=({
             "Button1": lambda: qtile.cmd_spawn("rofi -show drun"),
             "Button3": lambda: qtile.cmd_spawn("rofi -show run"),
-        }),
+	}),
         scale=True),
     widget.Sep(foreground=colours[2],linewidth=1, padding=10),
     widget.GroupBox(
+	fontsize = 14,
         active=colours[7],
         inactive=colours[2],
         other_current_screen_border=colours[5],
@@ -378,25 +391,21 @@ widgets = [
         padding=0,
         rounded=True,
         urgent_alert_method="text"),
-    widget.Sep(
-        foreground=colours[2],
-        linewidth=1,
-        padding=10),
+    widget.Sep(foreground=colours[2], linewidth=1, padding=10),
     widget.CurrentLayout(
+	fontsize = 14,
         foreground=colours[6],
         font="Roboto Nerd Font Bold"),
-    widget.Systray(
-        icon_size=14,
-        padding=4),
-    widget.Cmus(
-        noplay_color=colours[2],
-        play_color=colours[1]),
-    widget.Sep(
-        foreground=colours[2],
-        linewidth=1,
-        padding=10),
+#    widget.Systray(
+#        icon_size=14,
+#        padding=4),
+#    widget.Cmus(
+#        noplay_color=colours[2],
+#        play_color=colours[1]),
+    widget.Sep(foreground=colours[2], linewidth=1, padding=10),
     widget.WindowName(
-        max_chars=75),
+        max_chars=75,
+	fontsize = 14),
     # widget.Backlight(
     #     foreground=colours[3],
     #     foreground_alert=colours[3],
@@ -404,19 +413,68 @@ widgets = [
     #     backlight_name="amdgpu_bl0", # ls /sys/class/backlight/
     #     change_command="brightnessctl set {0}%",
     #     step=10),
+    widget.Prompt(
+        prompt="Set target: ",
+        foreground = colours[9],
+	),
+    widget.TextBox(
+	name = "targettext",
+        foreground = colours[9],
+	fontsize = 14,
+#	fmt = " {}",
+#	func = pollfunc,
+#	func = lambda: target
+	mouse_callbacks = {
+		"Button1": lambda: subprocess.run(["xclip", "-selection", "clipboard"], input=target.encode("utf-8"), check=True)
+	}
+        ),
+    widget.Sep(foreground=colours[0],linewidth=1,padding=10),
+    widget.GenPollCommand(
+	name = "vpn_ip",
+        foreground = colours[4],
+	fontsize = 14,
+	fmt = " {}",
+	cmd = "ip address | grep tun0 | grep inet | awk '{print $2}' | cut -d '/' -f 1",
+	shell = True,
+        update_interval = 2.0,
+        mouse_callbacks = {
+            "Button1": lambda: subprocess.check_output("ip address | grep tun0 | grep inet | awk '{print $2}' | cut -d '/' -f 1 | tr -d '\n' | xsel -ib", shell=True, text=True)
+        },
+        ),
+    widget.Sep(foreground=colours[2],linewidth=1,padding=10),
+    widget.GenPollCommand(
+	name = "ip",
+        foreground = colours[5],
+	fontsize = 14,
+	fmt = " {}",
+	cmd = "hostname -I | awk '{print $1}'",
+	shell = True,
+        update_interval = 2.0,
+        mouse_callbacks = {
+		"Button1" : lambda: subprocess.check_output("hostname -I | awk '{print $1}' | tr -d '\n' | xsel -ib", shell=True, text=True),
+        },
+        ),
+    widget.Sep(foreground=colours[2],linewidth=1,padding=10),
+    widget.Net(
+        foreground = colours[6],
+	fontsize = 14,
+	prefix = "M",
+	format = "{down:4.2f}{down_suffix}   {up:4.2f}{up_suffix}",
+    #     interface = "enp1s0"
+	),
+    widget.Sep(foreground=colours[2],linewidth=1,padding=10),
     widget.CPU(
-        foreground=colours[3],
+        foreground=colours[5],
+	fontsize = 14,
         format=" {load_percent}%",
         mouse_callbacks={
             "Button1": lambda: qtile.cmd_spawn(my_term + " -e htop"),
         },
         update_interval=1.0),
-    widget.Sep(
-        foreground=colours[2],
-        linewidth=1,
-        padding=10),
+    widget.Sep(foreground=colours[2], linewidth=1, padding=10),
     widget.Memory(
-        foreground=colours[4],
+        foreground=colours[7],
+	fontsize = 14,
         format=" {MemUsed:.1f}{mm}/{MemTotal:.1f}{mm}",
 mouse_callbacks={
             "Button1": lambda: qtile.cmd_spawn(my_term + " -e htop"),
@@ -446,25 +504,20 @@ mouse_callbacks={
 #        linewidth=1,
 #        padding=10),
     widget.Volume(
-        foreground=colours[6],
+        foreground=colours[8],
+	fontsize = 14,
         fmt=" {}",
         update_interval=0.1,
         volume_app="pavucontrol",
         step=5,
 	limit_max_volume="true"
-),
-    widget.Sep(
-        foreground=colours[2],
-        linewidth=1,
-        padding=10),
-    # widget.Net(
-    #     foreground = colours[7],
-    #     format = "爵 {down}  ",
-    #     interface = "enp1s0"),
+	),
+    widget.Sep(foreground=colours[2],linewidth=1,padding=10),
     widget.Battery(
-        foreground=colours[7],
+        foreground=colours[4],
+	fontsize = 14,
         format="{char} {percent:2.0%}",
-        charge_char="",
+        charge_char="",
         discharge_char="",
         empty_char="",
         full_char="",
@@ -476,20 +529,18 @@ mouse_callbacks={
 	update_interval=1,
 	scroll_interval=0.1
 	),
-    widget.Sep(
-        foreground=colours[2],
-        linewidth=1,
-        padding=10),
+    widget.Sep(foreground=colours[2], linewidth=1, padding=10),
     widget.Clock(
-        foreground=colours[8],
-        format=" %b %d %a %H:%M "),
+        foreground=colours[1],
+	fontsize = 14,
+        format=" %d %b %H:%M "),
     # widget.StockTicker(
     #     apikey="AESKWL5CJVHHJKR5",
     #     url="https://www.alphavantage.co/query?"),
 ]
 
 def status_bar(widgets):
-  return bar.Bar(widgets, 18, opacity=0.8)
+  return bar.Bar(widgets, 25, opacity=0.9, margin=2, border_width=0)
 
 screens = [
     Screen(
@@ -561,11 +612,11 @@ def stop_apps():
   delete_cache()
   qtile.cmd_spawn(["killall", "dunst", "lxpolkit", "picom", "udiskie"])
 
-@hook.subscribe.startup_once
-def start_apps():
-  qtile.cmd_spawn(["dunst"])
-  qtile.cmd_spawn(["lxpolkit"])
-  qtile.cmd_spawn(["picom", "-b"])
-  qtile.cmd_spawn(["udiskie", "-asn", "-f", "pcmanfm-qt"])
+#@hook.subscribe.startup_once
+#def start_apps():
+#  qtile.cmd_spawn(["dunst"])
+#  qtile.cmd_spawn(["lxpolkit"])
+#  qtile.cmd_spawn(["picom", "-b"])
+#  qtile.cmd_spawn(["udiskie", "-asn", "-f", "pcmanfm-qt"])
 
 wmname = "LG3D"
