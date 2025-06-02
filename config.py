@@ -23,9 +23,11 @@ from libqtile.widget.prompt import Prompt
 
 #autostart
 cmd = [
+	"xrandr --output Virtual-1 --mode 1920x1080",
 	"setxkbmap es",
 	"feh --bg-fill ~/.config/qtile/wall.jpg",
-	"picom --no-vsync &"
+	"picom --no-vsync &",
+	"spice-vdagent"
 ]
 for x in cmd:
 	os.system(x)
@@ -425,7 +427,7 @@ widgets = [
 #	func = pollfunc,
 #	func = lambda: target
 	mouse_callbacks = {
-		"Button1": lambda: subprocess.run(["xclip", "-selection", "clipboard"], input=target.encode("utf-8"), check=True)
+	"Button1": lambda: subprocess.run(["xsel", "-ib"], input=target.encode("utf-8"), check=True)
 	}
         ),
     widget.Sep(foreground=colours[0],linewidth=1,padding=10),
@@ -512,23 +514,23 @@ mouse_callbacks={
         step=5,
 	limit_max_volume="true"
 	),
-    widget.Sep(foreground=colours[2],linewidth=1,padding=10),
-    widget.Battery(
-        foreground=colours[4],
-	fontsize = 14,
-        format="{char} {percent:2.0%}",
-        charge_char="",
-        discharge_char="",
-        empty_char="",
-        full_char="",
-        unknown_char="",
-        low_foreground=colours[3],
-        low_percentage=0.15,
-        show_short_text=False,
-        notify_below=15,
-	update_interval=1,
-	scroll_interval=0.1
-	),
+#    widget.Sep(foreground=colours[2],linewidth=1,padding=10),
+#    widget.Battery(
+#        foreground=colours[4],
+#	fontsize = 14,
+#        format="{char} {percent:2.0%}",
+#        charge_char="",
+#        discharge_char="",
+#        empty_char="",
+#        full_char="",
+#        unknown_char="",
+#        low_foreground=colours[3],
+#        low_percentage=0.15,
+#        show_short_text=False,
+#        notify_below=15,
+#	update_interval=1,
+#	scroll_interval=0.1
+#	),
     widget.Sep(foreground=colours[2], linewidth=1, padding=10),
     widget.Clock(
         foreground=colours[1],
